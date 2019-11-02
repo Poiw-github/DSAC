@@ -11,9 +11,9 @@ include(FindPNG)
 include_directories(${PNG_INCLUDE_DIR})
 
 # LUA and Torch
-include_directories(/usr/include/lua5.3)
-include_directories(~/lib/torch/install/include/)
-link_directories(~/lib/torch/install/lib/)
+include_directories(/usr/include/lua5.1)
+include_directories(/home/poi/Software/libtorch/include/)
+link_directories(/home/poi/Software/libtorch/lib/)
 
 # OpenCV
 find_package(OpenCV REQUIRED)
@@ -100,9 +100,9 @@ add_executable(train_ransac_softam
     read_data.cpp
     thread_rand.cpp)
   
-target_link_libraries(train_obj ${PNG_LIBRARY} ${OpenCV_LIBS} luajit) 
-target_link_libraries(train_score ${PNG_LIBRARY} ${OpenCV_LIBS} luajit)
-target_link_libraries(test_ransac ${PNG_LIBRARY} ${OpenCV_LIBS} luajit)
-target_link_libraries(train_ransac ${PNG_LIBRARY} ${OpenCV_LIBS} luajit)
-target_link_libraries(test_ransac_softam ${PNG_LIBRARY} ${OpenCV_LIBS} luajit)
-target_link_libraries(train_ransac_softam ${PNG_LIBRARY} ${OpenCV_LIBS} luajit)
+target_link_libraries(train_obj ${PNG_LIBRARY} ${OpenCV_LIBS} ${TORCH_LIBRARIES} luajit lua5.1) 
+target_link_libraries(train_score ${PNG_LIBRARY} ${OpenCV_LIBS} ${TORCH_LIBRARIES} luajit lua5.1)
+target_link_libraries(test_ransac ${PNG_LIBRARY} ${OpenCV_LIBS} ${TORCH_LIBRARIES} luajit lua5.1)
+target_link_libraries(train_ransac ${PNG_LIBRARY} ${OpenCV_LIBS} ${TORCH_LIBRARIES} luajit lua5.1)
+target_link_libraries(test_ransac_softam ${PNG_LIBRARY} ${OpenCV_LIBS} ${TORCH_LIBRARIES} luajit lua5.1)
+target_link_libraries(train_ransac_softam ${PNG_LIBRARY} ${OpenCV_LIBS} ${TORCH_LIBRARIES} luajit lua5.1)

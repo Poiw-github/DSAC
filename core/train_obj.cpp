@@ -60,7 +60,9 @@ void assembleData(
     #pragma omp parallel for 
     for(int i = 0; i < trainingImages; i++)
     {
-        int imgIdx = irand(0, dataset.size()); // choose a random image
+        //int imgIdx = irand(0, dataset.size()); // choose a random image
+        int imgIdx = i;
+        printf("imgIdx: %d\n", imgIdx);
 
         // RGB image
         jp::img_bgr_t imgBGR;
@@ -232,6 +234,8 @@ int main(int argc, const char* argv[])
         std::cout << std::endl << REDTEXT("The training set is empty !") << std::endl;
         return 0;
     }
+
+    trainingImages = trainDataset.size();
 
     #if DOVALIDATION
     std::string validationDir = dataDir + "validation/";

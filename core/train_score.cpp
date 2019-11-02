@@ -186,7 +186,9 @@ void assembleData(
     for(int i = 0; i < imageCount; i++)
     {
         // load random frame and ground truth pose
-        int imgIdx = irand(0, dataset.size());
+        // int imgIdx = irand(0, dataset.size());
+        int imgIdx = i; // not random
+        std::cout << "imgIdx: " << imgIdx << std::endl;
 
         jp::img_bgr_t imgBGR;
         dataset.getBGR(imgIdx, imgBGR);
@@ -217,6 +219,11 @@ void assembleData(
             data[i * hypsPerImage + h] = getDiffMap(jp::our2cv(jp::jp_trans_t(poseNoise.getRotation(), poseNoise.getTranslation())), estObj, sampling, camMat);
 
             // check whether pose is above or below error tolerance
+
+            // std::cout << "Angular Error: " << poseGT.calcAngularDistance(poseNoise) << std::endl;
+            // std::cout << "Translation Error: " << cv::norm(poseGT.getTranslation() - poseNoise.getTranslation()) << std::endl;
+
+
             if(poseGT.calcAngularDistance(poseNoise) < 5 && cv::norm(poseGT.getTranslation() - poseNoise.getTranslation()) < 50)
             {
                 #pragma omp critical
@@ -293,6 +300,8 @@ int main(int argc, const char* argv[])
     std::vector<std::string> trainingSets = getSubPaths(trainingDir);
     std::cout << std::endl << BLUETEXT("Loading training set ...") << std::endl;
     jp::Dataset trainingDataset = jp::Dataset(trainingSets[0], 1);
+
+    trainingImages = trainingDataset.size();
   
     #if DOVALIDATION
     std::string validationDir = dataDir + "validation/";
@@ -382,6 +391,8 @@ int main(int argc, const char* argv[])
         for(unsigned i = 0; i < trainData.size(); i++)
             trainPermutation[i] = i;
         std::shuffle(trainPermutation.begin(), trainPermutation.end(), randG);
+
+        std::cout << "start training\n";
 
         for(int b = 0; b < trainData.size() / objBatchSize; b++)
         {
