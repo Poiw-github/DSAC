@@ -5,7 +5,7 @@ require 'cudnn'
 
 -- general parameters
 storeCounter = 0 -- counts parameter updates
-batchSize = 1600 -- how many patches to process simultaneously, determined by GPU memory
+batchSize = 400 -- how many patches to process simultaneously, determined by GPU memory
 
 -- parameters of pretraining
 storeIntervalPre = 1000 -- storing snapshot after x updates
@@ -123,10 +123,11 @@ function forward(count, data)
     input[{ {}, {c}, {}, {}  }]:add(-mean[c]) 
   end
 
-  print('TORCH: Doing a forward pass for ' .. count .. ' patches.')
+  print('TORCH: Doing a forward pass for ' .. count .. ' patches')
 
   local batchCount = math.ceil(count / batchSize)
   local results = torch.Tensor(count, 3)
+
 
   -- batch-wise forward
   for b=1,batchCount do
@@ -205,6 +206,7 @@ function backward(count, loss, data, gradients)
   optim.sgd(feval, params, optimState)
 
   storeCounter = storeCounter + 1
+  print("Backward storeCounter", storeCounter)
 
   if (storeCounter % storeIntervalE2E) == 0 then
     print('TORCH: Storing a snapshot of the network.')
@@ -253,6 +255,8 @@ function train(count, data, labels)
   optim.adam(feval, params, optimState)
 
   storeCounter = storeCounter + 1
+
+  print("storeCounter", storeCounter)
 
   if (storeCounter % storeIntervalPre) == 0 then
     print('TORCH: Storing a snapshot of the network.')

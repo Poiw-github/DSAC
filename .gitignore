@@ -1,1 +1,7 @@
-7scenes
+7scenes/*/test
+7scenes/*/training
+7scenes/*/validation
+7scenes/*/*.net
+7scenes/*/*.lua.txt
+core/build
+.vscode/
