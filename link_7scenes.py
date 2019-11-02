@@ -63,6 +63,8 @@ def link_data(data_dir, dest_dir):
         split_file = os.path.join(abs_data_dir, set_type + "Split.txt")
         splits = open(split_file, "r").readlines()
         indices = [parse("{}{res:d}", _s)["res"] for _s in splits]
+        if args.flag:
+            indices = [2]
         subdirs = [
             os.path.join(abs_data_dir, "seq-{:02d}".format(_i))
             for _i in indices
@@ -163,6 +165,13 @@ if __name__ == '__main__':
         default=True,
         help="If true, will simply return what the script will link. "
         "By default it is set to True."
+    )
+    parser.add_argument(
+        "--flag",
+        type="bool",
+        default=False,
+        help="If true, do somethin"
+        "By default it is set to False."
     )
     args, unparsed = parser.parse_known_args()
     main(args, unparsed)
