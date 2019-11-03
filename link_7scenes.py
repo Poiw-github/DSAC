@@ -78,6 +78,7 @@ def link_data(data_dir, dest_dir):
                 for _f in os.listdir(_dir)
                 if _f.endswith(suffix) and ((int(_f.split('-')[1].split('.')[0]) % 100 == 50 and set_type == "Train") or (set_type == "Test"))
             ]
+        file_names.sort()
         # Make sure nothing is going wrong by looking at the list of file names
         assert len(file_names) > 0
         # Now make symlinks
