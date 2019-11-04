@@ -62,11 +62,12 @@ void assembleData(
     {
         //int imgIdx = irand(0, dataset.size()); // choose a random image
         int imgIdx = i;
-        printf("imgIdx: %d\n", imgIdx);
+        std::cout << "imgIdx: " << imgIdx << "\n";
 
         // RGB image
         jp::img_bgr_t imgBGR;
         dataset.getBGR(imgIdx, imgBGR);
+        //std::cout << "GetRGB\n";
 
         // Ground truth object coordinates
         jp::img_coord_t imgObj;
@@ -201,7 +202,7 @@ int main(int argc, const char* argv[])
     
     int trainingImages = 100; // number of training images randonly chosen in each training round
     int trainingPatches = 512; // number of patches extracted from each training image
-    int trainingLimit = 300000; // number of parameter updates performed
+    int trainingLimit = 150000; // number of parameter updates performed
     int batchSize = 64; // training batch size
     
     int validationImages = 100; // number of validation images randomly chosen from the validation set
