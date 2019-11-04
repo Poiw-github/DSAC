@@ -276,7 +276,7 @@ int main(int argc, const char* argv[])
     
     int trainingImages = 100; // number of training images used to extract reprojection error images in each training round
     int trainingHyps = 16; // number of reprojection error images per training image in each training round
-    int trainingRounds = 80; // total number of training rounds
+    int trainingRounds = 300; // total number of training rounds
    
     int validationImages = 100; // number of validation images used to extract reprojection error images for the validation set
     int validationHyps = 64; // number of reprojection error images per validation image for the validation set
