@@ -194,6 +194,14 @@ namespace jp
                     if(depth == 0) continue;
 
                     cv::Point2f pt = mapDepthToRGB(x, y, depth);
+
+                    // remove invalid points
+                    if(pt.y < 0 || pt.y >= img.rows || pt.x < 0 || pt.x >= img.cols) {
+                        // std::cout << x << " " << y << "\n";
+                        // std::cout << pt.x << " " << pt.y << "\n\n";
+                        continue;
+                    }
+
                     depthMapped(pt.y, pt.x) = depth;
                 }
 
