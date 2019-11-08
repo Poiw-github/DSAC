@@ -3,5 +3,6 @@
 7scenes/*/validation
 7scenes/*/*.net
 7scenes/*/*.lua.txt
+7scenes/*/all
 core/build
 .vscode/

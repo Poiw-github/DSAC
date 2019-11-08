@@ -57,14 +57,19 @@ def link_data(data_dir, dest_dir):
     print("data_dir: {}".format(abs_data_dir))
     print("dest_dir: {}".format(abs_dest_dir))
 
+    test_seq = 0
     # For both train and test data
-    for set_type in ["Train", "Test"]:
+    for set_type in ["Test", "Train"]:
         # Parse the split file to get the list of train and test splits
         split_file = os.path.join(abs_data_dir, set_type + "Split.txt")
         splits = open(split_file, "r").readlines()
         indices = [parse("{}{res:d}", _s)["res"] for _s in splits]
         if args.flag:
-            indices = [2]
+            if set_type == "Test":
+                indices = indices[0:1]
+                test_seq = indices
+            else:
+                indices = test_seq
         subdirs = [
             os.path.join(abs_data_dir, "seq-{:02d}".format(_i))
             for _i in indices
