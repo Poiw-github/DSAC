@@ -4,5 +4,6 @@
 7scenes/*/*.net
 7scenes/*/*.lua.txt
 7scenes/*/all
+7scenes/*/sensorTrans.txt
 core/build
 .vscode/
