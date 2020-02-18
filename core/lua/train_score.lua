@@ -9,7 +9,7 @@ mean = {45} -- value substracted from input for normalization (reprojection erro
 storeCounter = 0 -- counts parameter updates
 
 -- parameters of pretraining
-storeIntervalPre = 100 -- storing snapshot after x updates
+storeIntervalPre = 10 -- storing snapshot after x updates
 lrIntervalPre = 5000 -- cutting learning rate in half after x updates
 lrInitPre = 0.0001 -- (initial) learning rate of componentwise pre-training
 sFilePre = 'score_model_init.net' -- output file name of componentwise pre-training
