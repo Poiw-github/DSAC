@@ -37,7 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "cnn.h"
 #include <fstream>
 
-#define DOVALIDATION 0 // compile flag, if true a validation set has to be available
+#define DOVALIDATION 1 // compile flag, if true a validation set has to be available
 
 /**
  * @brief Returns a random 6D pose hypothesis.
@@ -186,9 +186,7 @@ void assembleData(
     for(int i = 0; i < imageCount; i++)
     {
         // load random frame and ground truth pose
-        // int imgIdx = irand(0, dataset.size());
-        int imgIdx = i; // not random
-        std::cout << "imgIdx: " << imgIdx << std::endl;
+        int imgIdx = irand(0, dataset.size());
 
         jp::img_bgr_t imgBGR;
         dataset.getBGR(imgIdx, imgBGR);
@@ -276,11 +274,11 @@ int main(int argc, const char* argv[])
     
     int trainingImages = 100; // number of training images used to extract reprojection error images in each training round
     int trainingHyps = 16; // number of reprojection error images per training image in each training round
-    int trainingRounds = 300; // total number of training rounds
+    int trainingRounds = 80; // total number of training rounds
    
     int validationImages = 100; // number of validation images used to extract reprojection error images for the validation set
     int validationHyps = 64; // number of reprojection error images per validation image for the validation set
-    int validationInterval = 10; // after how many training rounds is a validation pass performed?
+    int validationInterval = 1; // after how many training rounds is a validation pass performed?
 
     GlobalProperties* gp = GlobalProperties::getInstance();   
     gp->parseConfig();
@@ -310,6 +308,8 @@ int main(int argc, const char* argv[])
     std::cout << std::endl << BLUETEXT("Loading validation set ...") << std::endl;
     jp::Dataset valDataset = jp::Dataset(validationSets[0], 1);
     #endif
+
+    validationImages = valDataset.size();
     
     // lua and models
     std::cout << "Loading script: " << baseScriptRGB << std::endl;    
@@ -355,6 +355,9 @@ int main(int argc, const char* argv[])
     #endif
     
     int trainCounter = 0;
+
+    
+    float minval_loss = 100000;
     
     for(int round = 0; round <= trainingRounds; round++)
     {
@@ -377,6 +380,12 @@ int main(int argc, const char* argv[])
             valLoss /= (valData.size() / objBatchSize);
             correctPoseChosen /= (valData.size() / objBatchSize);
 
+            if (valLoss < minval_loss) {
+                minval_loss = valLoss;
+                valFile << "save the model" << std::endl;
+                system("cp score_model_init.net score_model_init.net.bestval");
+            }
+
             std::cout << GREENTEXT("Vaidation loss: " << valLoss << ", correct: " << correctPoseChosen * 100 << "%") << std::endl;
             valFile << trainCounter << " " << valLoss << " " << correctPoseChosen << std::endl;
 	    }
@@ -393,6 +402,7 @@ int main(int argc, const char* argv[])
         std::shuffle(trainPermutation.begin(), trainPermutation.end(), randG);
 
         std::cout << "start training\n";
+
 
         for(int b = 0; b < trainData.size() / objBatchSize; b++)
         {

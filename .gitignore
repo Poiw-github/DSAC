@@ -7,5 +7,7 @@
 7scenes/*/sensorTrans.txt
 7scenes/*/*.png
 7scenes/*/seq*
+7scenes/*/*/pose*.txt
+7scenes/
 core/build
 .vscode/

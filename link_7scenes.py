@@ -33,6 +33,7 @@ from __future__ import print_function
 import argparse
 import os
 import sys
+import numpy as np
 
 from parse import parse
 
@@ -58,6 +59,7 @@ def link_data(data_dir, dest_dir):
     print("dest_dir: {}".format(abs_dest_dir))
 
     test_seq = 0
+    validation_names = []
     # For both train and test data
     for set_type in ["Test", "Train"]:
         # Parse the split file to get the list of train and test splits
@@ -66,7 +68,7 @@ def link_data(data_dir, dest_dir):
         indices = [parse("{}{res:d}", _s)["res"] for _s in splits]
         if args.flag:
             if set_type == "Test":
-                indices = indices[0:1]
+                indices = [6]
                 test_seq = indices
             else:
                 indices = test_seq
@@ -74,6 +76,8 @@ def link_data(data_dir, dest_dir):
             os.path.join(abs_data_dir, "seq-{:02d}".format(_i))
             for _i in indices
         ]
+        if set_type == 'Train':
+            subdirs = [os.path.join(abs_data_dir, "ours")]
         # Find all files (except the suffix)
         file_names = []
         for _dir in subdirs:
@@ -81,8 +85,19 @@ def link_data(data_dir, dest_dir):
             file_names += [
                 os.path.join(_dir, _f.rstrip(suffix))
                 for _f in os.listdir(_dir)
-                if _f.endswith(suffix) and ((int(_f.split('-')[1].split('.')[0]) % 100 == 50 and set_type == "Train") or (set_type == "Test"))
+                # if _f.endswith(suffix) and ((int(_f.split('-')[1].split('.')[0]) % 100 == 50 and set_type == "Train") or (set_type == "Test"))
+                if _f.endswith(suffix)
             ]
+
+        # if set_type == "Train":
+        #     np.random.shuffle(file_names)
+        #     val_length = len(file_names) // 10
+        #     train_length = len(file_names) - val_length
+        #     validation_names = file_names[train_length:]
+        #     file_names = file_names[0:train_length]
+        if set_type == "Test":
+            validation_names = np.random.choice(file_names, 5, replace=False)
+
         file_names.sort()
         # Make sure nothing is going wrong by looking at the list of file names
         assert len(file_names) > 0
@@ -131,6 +146,49 @@ def link_data(data_dir, dest_dir):
             else:
                 link_file(old_file_name + ".pose.txt", new_file_name)
         print("\r{} done.                  ".format(print_prefix))
+
+        if set_type == "Test":
+            print_prefix = "Linking for validation ... "
+            for i, old_file_name in enumerate(validation_names):
+                print(
+                    "\r{} {}/{}".format(print_prefix, i + 1, len(validation_names)),
+                    end="",
+                )
+                sys.stdout.flush()
+                # For some reason the folder naming strategy is incosistent...
+                suffix = "validation"
+                prefix = os.path.join(abs_dest_dir, suffix, "scene")
+                # For the color images
+                new_file_name = os.path.join(
+                    prefix, "rgb_noseg",
+                    "{:09d}.png".format(i))
+                if args.dry_run:
+                    print("{} --> {}".format(
+                        old_file_name + ".color.png", new_file_name))
+                else:
+                    link_file(old_file_name + ".color.png", new_file_name)
+                # For the depth images
+                new_file_name = os.path.join(
+                    prefix, "depth_noseg",
+                    "{:09d}.png".format(i))
+                if args.dry_run:
+                    print("{} --> {}".format(
+                        old_file_name + ".depth.png", new_file_name))
+                else:
+                    # remove target file if it exists
+                    if os.path.exists(new_file_name):
+                        os.remove(new_file_name)
+                    link_file(old_file_name + ".depth.png", new_file_name)
+                # For the pose files
+                new_file_name = os.path.join(
+                    prefix, "poses",
+                    "{:09d}.txt".format(i))
+                if args.dry_run:
+                    print("{} --> {}".format(
+                        old_file_name + ".pose.txt", new_file_name))
+                else:
+                    link_file(old_file_name + ".pose.txt", new_file_name)
+            print("\r{} done.                  ".format(print_prefix))
 
 
 def main(args, unparsed):

@@ -5,7 +5,7 @@ require 'cudnn'
 
 -- general parameters
 storeCounter = 0 -- counts parameter updates
-batchSize = 400 -- how many patches to process simultaneously, determined by GPU memory
+batchSize = 1600 -- how many patches to process simultaneously, determined by GPU memory
 
 -- parameters of pretraining
 storeIntervalPre = 1000 -- storing snapshot after x updates

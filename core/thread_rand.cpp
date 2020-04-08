@@ -27,6 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "thread_rand.h"
 #include <omp.h>
+#include <chrono>  
 
 std::vector<std::mt19937> ThreadRand::generators;
 bool ThreadRand::initialised = false;
@@ -44,11 +45,13 @@ void ThreadRand::init(unsigned seed)
 	if(!initialised)
 	{
 	    unsigned nThreads = omp_get_max_threads();
+        unsigned random_seed = std::chrono::system_clock::now().time_since_epoch().count();  
 	    
 	    for(unsigned i = 0; i < nThreads; i++)
 	    {    
 		generators.push_back(std::mt19937());
 		generators[i].seed(i+seed);
+        // generators[i].seed(random_seed);
 	    }
 
 	    initialised = true;

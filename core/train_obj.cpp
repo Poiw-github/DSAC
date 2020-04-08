@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <fstream>
 
-#define DOVALIDATION 0 // compile flag, if true a validation set has to be available
+#define DOVALIDATION 1 // compile flag, if true a validation set has to be available
 
 /**
  * @brief Generates a list of RGB patches with associated groud truth object coordinates
@@ -60,9 +60,7 @@ void assembleData(
     #pragma omp parallel for 
     for(int i = 0; i < trainingImages; i++)
     {
-        //int imgIdx = irand(0, dataset.size()); // choose a random image
-        int imgIdx = i;
-        std::cout << "imgIdx: " << imgIdx << "\n";
+        int imgIdx = irand(0, dataset.size()); // choose a random image
 
         // RGB image
         jp::img_bgr_t imgBGR;
@@ -202,7 +200,7 @@ int main(int argc, const char* argv[])
     
     int trainingImages = 100; // number of training images randonly chosen in each training round
     int trainingPatches = 512; // number of patches extracted from each training image
-    int trainingLimit = 150000; // number of parameter updates performed
+    int trainingLimit = 300000; // number of parameter updates performed
     int batchSize = 64; // training batch size
     
     int validationImages = 100; // number of validation images randomly chosen from the validation set
@@ -236,7 +234,7 @@ int main(int argc, const char* argv[])
         return 0;
     }
 
-    trainingImages = trainDataset.size();
+    // trainingImages = trainDataset.size();
 
     #if DOVALIDATION
     std::string validationDir = dataDir + "validation/";
@@ -245,6 +243,8 @@ int main(int argc, const char* argv[])
     std::cout << std::endl << BLUETEXT("Loading validation set ...") << std::endl;
     jp::Dataset valDataset = jp::Dataset(validationSets[0], 1);
     #endif
+
+    // validationImages = valDataset.size();
     
     // initialize data
     std::vector<cv::Mat_<cv::Vec3f>> data;
@@ -259,7 +259,9 @@ int main(int argc, const char* argv[])
     luaL_openlibs(state);
     
     execute(baseScriptRGB.c_str(), state);
-    constructModel(channels, inputSize, state);
+    std::string modelFileRGB = gp->dP.objModel;
+    loadModel(modelFileRGB, CNN_RGB_CHANNELS, CNN_RGB_PATCHSIZE, state);
+    // constructModel(channels, inputSize, state);
     setEvaluate(state);
 
     // pre-load validation data
@@ -293,6 +295,8 @@ int main(int argc, const char* argv[])
     
     int trainCounter = 0;
     int round = 0;
+
+    float minval_loss = 100000;
     
     while(trainCounter <= trainingLimit)
     {
@@ -308,6 +312,7 @@ int main(int argc, const char* argv[])
             float loss = train(batchData, batchLabels, state); // forward-backward
 
             trainFile << trainCounter++ << " " << loss << std::endl;
+            std::cout << "trainingLimit: " << trainingLimit<< " " << trainCounter << "\n";
             std::cout << YELLOWTEXT("Training loss: " << loss) << std::endl;
         }
 
@@ -332,6 +337,11 @@ int main(int argc, const char* argv[])
         valInliers /= (valData.size() / batchSize);
 
         valFile << (trainCounter-1) << " " << valLoss << " " << valInliers << std::endl;
+        if (valLoss < minval_loss) {
+            minval_loss = valLoss;
+            valFile << "save the model" << std::endl;
+            system("cp obj_model_init.net obj_model_init.net.bestval");
+        }
         std::cout << YELLOWTEXT("Validation loss: " << valLoss << " (Inliers: " << valInliers * 100 << "%)") << std::endl;
         #endif
     }
